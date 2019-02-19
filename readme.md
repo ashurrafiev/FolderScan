@@ -1,4 +1,6 @@
-Example config file:
+**FolderScan** is a tool for quick scanning for changed files within the speficied folders, comparing the current structure to a previously created snapshot.
+
+The list of directories to scan are specified in a config file. The directories are scanned recursively. [Example](example.cfg) config file:
 
 ```
 D:/Workspace
@@ -10,12 +12,21 @@ ignore:
 */bin
 ```
 
-To use it, rename to `folderscan.cfg`.
+To use it, rename to `folderscan.cfg`. In this example, the tool will scan `D:/Workspace` ignoring folders named `.git`, `.metadata`, etc. _Please note, that the ignore filter is only applied to folders, not files!_
 
-To recursively scan the listed directories and save the snapshot as `folderscan.data`:
+### Using the tool from a JAR file ###
+
+It is recommended to build the tool as a JAR file. 
+
+To recursively scan directories and save the snapshot as `folderscan.data` use:
 
 ```
 >java -jar folderscan.jar -save
+```
+
+For the given example config, the output will probably be:
+
+```
 Loading config ...
 Loading data ...
 .\folderscan.data (The system cannot find the file specified)
@@ -27,10 +38,15 @@ No saved data for D:/Workspace
 Done
 ```
 
-To recursively scan the listed directories and compare with the previously saved snapshot:
+To recursively scan directories and compare with the previously saved snapshot use:
 
 ```
 >java -jar folderscan.jar
+```
+
+Assuming, some files have been modified, the output will be:
+
+```
 Loading config ...
 Loading data ...
 Scanning D:/Workspace ...
@@ -40,4 +56,10 @@ In D:/Workspace/FolderScan/src/com/xrbpowered/folderscan:
 In D:/Workspace/FolderScan:
    Added: folderscan.data
 Done
+```
+
+If you expect many file modifications, it may be useful to redirect the output to a text file:
+
+```
+>java -jar folderscan.jar > folderscan.txt
 ```

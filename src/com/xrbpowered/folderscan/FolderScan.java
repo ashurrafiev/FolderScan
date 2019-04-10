@@ -6,7 +6,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Scanner;
@@ -24,6 +26,12 @@ public class FolderScan {
 	
 	public static String regex(String s) {
 		return s.replaceAll("([^A-Za-z0-9*])", "\\\\$1").replaceAll("\\*", ".*?")+"$";
+	}
+	
+	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	
+	public static String formatDate(long date) {
+		return dateFormat.format(new Date(date));
 	}
 	
 	public static void loadConfig() {
@@ -184,7 +192,7 @@ public class FolderScan {
 			FileInfo fileOld = old.files.get(file.name);
 			if(fileOld!=null) {
 				if(file.modified!=fileOld.modified || file.size!=fileOld.size)
-					prompt = report("Modified", prompt, path, file);
+					prompt = report("Modified on "+formatDate(file.modified), prompt, path, file);
 			}
 			else
 				prompt = report("Added", prompt, path, file);
@@ -221,7 +229,8 @@ public class FolderScan {
 	public static void loadData(String dataPath) {
 		System.out.printf("Loading data ...\n");
 		try {
-			ZipInputStream zip = new ZipInputStream(new FileInputStream(new File(dataPath)));
+			File file = new File(dataPath);
+			ZipInputStream zip = new ZipInputStream(new FileInputStream(file));
 			zip.getNextEntry();
 			DataInputStream in = new DataInputStream(zip);
 			
@@ -233,6 +242,8 @@ public class FolderScan {
 			}
 
 			zip.close();
+			long modified = file.lastModified();
+			System.out.println("Looking for modifications since "+formatDate(modified));
 		}
 		catch(Exception e) {
 			System.err.println(e.getMessage());

@@ -68,3 +68,16 @@ If you expect many file modifications, it may be useful to redirect the output t
 ```
 java -jar folderscan.jar > folderscan.txt
 ```
+
+You can store `folderscan.data` snapshot together with the backup and then use **-in** option to tell which snapshot to compare to:
+
+```
+java -jar folderscan.jar -in mybackup/folderscan.data
+```
+
+## Command Line Options Summary
+
+| option | description |
+| :--- | :--- |
+| **-save** | Save snapshot of the folder structure to `folderscan.data`. |
+| **-in**&nbsp;filename | Read snapshot data from a specific file. By default, the data is read from `folderscan.data` in the current directory. |

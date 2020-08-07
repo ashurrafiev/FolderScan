@@ -1,5 +1,6 @@
 package com.xrbpowered.folderscan.ui;
 
+import com.xrbpowered.folderscan.FolderScanUI;
 import com.xrbpowered.folderscan.data.FolderInfo;
 import com.xrbpowered.zoomui.GraphAssist;
 
@@ -20,8 +21,9 @@ public class UIFolderItem extends UIFileListItemBase {
 			g.fill(this, hover ? colorHighlight : colorBackground);
 			folderIcon.paint(g.graph, 2, 8, 4, 16, getPixelScale(), true);
 			g.setColor(colorAmber);
-			g.drawString(info.name, 32, getHeight()/2, GraphAssist.LEFT, GraphAssist.CENTER);
-			g.drawString("(ignore)", 780, getHeight()/2, GraphAssist.LEFT, GraphAssist.CENTER);
+			UIFileListHeader hdr = FolderScanUI.ui.listHeader;
+			drawString(g, info.name, hdr.headerName);
+			drawString(g, "(ignore)", hdr.headerTime);
 		}
 		else {
 			g.fill(this, getBackgroundColor());

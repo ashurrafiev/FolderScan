@@ -4,6 +4,7 @@ import static com.xrbpowered.folderscan.ui.Format.*;
 
 import java.awt.Color;
 
+import com.xrbpowered.folderscan.FolderScanUI;
 import com.xrbpowered.folderscan.data.FileInfo;
 import com.xrbpowered.folderscan.data.FolderInfo;
 import com.xrbpowered.folderscan.ui.FileSort.SortMode;
@@ -85,56 +86,66 @@ public abstract class UIFileListItemBase extends UIHoverElement {
 		return info.added || info.modified || info.removed;
 	}
 	
+	protected void drawString(GraphAssist g, String s, UIFileListHeader.UIHeaderButton hdr) {
+		drawString(g, s, hdr, 0);
+	}
+
+	protected void drawString(GraphAssist g, String s, UIFileListHeader.UIHeaderButton hdr, float tx) {
+		g.drawString(s, hdr.getTextX()+tx, getHeight()/2, hdr.align, GraphAssist.CENTER);
+	}
+
 	protected void paintInfo(GraphAssist g, boolean canFill) {
 		canFill &= !info.marked;
+		UIFileListHeader hdr = FolderScanUI.ui.listHeader;
 		
-		g.drawString(info.name, 32, getHeight()/2, GraphAssist.LEFT, GraphAssist.CENTER);
+		drawString(g, info.name, hdr.headerName);
 		if(info.sizeDiff!=0) {
 			g.setColor(info.sizeDiff>0 ? colorGreen: colorRed);
-			g.drawString(formatLargeNumber(info.sizeDiff, "(%%+.%df%%s)"), 408, getHeight()/2, GraphAssist.LEFT, GraphAssist.CENTER);
+			drawString(g, formatLargeNumber(info.sizeDiff, "(%%+.%df%%s)"), hdr.headerSizeDiff);
 		}
 		
 		g.setColor(isChanged() ? colorText : colorTextDisabled);
-		g.drawString(formatDate(info.time), 780, getHeight()/2, GraphAssist.LEFT, GraphAssist.CENTER);
-		g.drawString(formatDateDiff(info.time), 848, getHeight()/2, GraphAssist.LEFT, GraphAssist.CENTER);
-		g.drawString(formatLargeNumber(info.size), 400, getHeight()/2, GraphAssist.RIGHT, GraphAssist.CENTER);
+		drawString(g, formatDate(info.time), hdr.headerTime);
+		drawString(g, formatDateDiff(info.time), hdr.headerTime, 68);
+		drawString(g, formatLargeNumber(info.size), hdr.headerSize);
 		
 		if(info.isFolder()) {
 			if(info.added)
 				g.setColor(colorGreen);
 			else if(info.removed)
 				g.setColor(colorRed);
-			g.drawString(formatLargeNumber(info.totalFiles), 550, getHeight()/2, GraphAssist.RIGHT, GraphAssist.CENTER);
+			drawString(g, formatLargeNumber(info.totalFiles), hdr.headerFiles);
 			
 			FolderInfo folder = (FolderInfo) info;
 			if(!info.added && folder.countAdded>0) {
 				if(canFill)
-					g.fillRect(628-50, 0, 50, getHeight(), colorBgGreen);
+					g.fillRect(hdr.headerChanges.getX(), 0, 50, getHeight(), colorBgGreen);
 				g.setColor(colorGreen);
-				g.drawString(formatLargeNumber(folder.countAdded), 620, getHeight()/2, GraphAssist.RIGHT, GraphAssist.CENTER);
+				drawString(g, formatLargeNumber(folder.countAdded), hdr.headerChanges, -100);
 			}
 			if(!info.modified && folder.countModified>0) {
 				if(canFill)
-					g.fillRect(678-50, 0, 50, getHeight(), colorBgAmber);
+					g.fillRect(hdr.headerChanges.getX()+50, 0, 50, getHeight(), colorBgAmber);
 				g.setColor(colorAmber);
-				g.drawString(formatLargeNumber(folder.countModified), 670, getHeight()/2, GraphAssist.RIGHT, GraphAssist.CENTER);
+				drawString(g, formatLargeNumber(folder.countModified), hdr.headerChanges, -50);
 			}
 			if(!info.removed && folder.countRemoved>0) {
 				if(canFill)
-					g.fillRect(728-50, 0, 50, getHeight(), colorBgRed);
+					g.fillRect(hdr.headerChanges.getX()+100, 0, 50, getHeight(), colorBgRed);
 				g.setColor(colorRed);
-				g.drawString(formatLargeNumber(folder.countRemoved), 720, getHeight()/2, GraphAssist.RIGHT, GraphAssist.CENTER);
+				drawString(g, formatLargeNumber(folder.countRemoved), hdr.headerChanges, 0);
 			}
 		}
 		
+		float x = hdr.headerChanges.getTextX()-14;
 		if(info.added)
-			iconCheckAdded.paint(g.graph,0, 608, 4, 16, getPixelScale(), true);
+			iconCheckAdded.paint(g.graph, 0, x-100, 4, 16, getPixelScale(), true);
 		if(info.modified)
-			iconCheckModified.paint(g.graph,0, 658, 4, 16, getPixelScale(), true);
+			iconCheckModified.paint(g.graph, 0, x-50, 4, 16, getPixelScale(), true);
 		if(info.removed)
-			iconCheckRemoved.paint(g.graph,0, 708, 4, 16, getPixelScale(), true);
+			iconCheckRemoved.paint(g.graph, 0, x, 4, 16, getPixelScale(), true);
 		if(info.marked)
-			iconCheckMarked.paint(g.graph,0, 968+8, 4, 16, getPixelScale(), true);
+			iconCheckMarked.paint(g.graph, 0, hdr.headerMark.getTextX(), 4, 16, getPixelScale(), true);
 	}
 	
 	protected void paintBorder(GraphAssist g) {

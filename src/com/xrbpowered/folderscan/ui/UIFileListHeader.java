@@ -6,6 +6,7 @@ import com.xrbpowered.folderscan.FolderScanUI;
 import com.xrbpowered.folderscan.ui.FileSort.SortMode;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
+import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.base.UIHoverElement;
 import com.xrbpowered.zoomui.std.UIListItem;
 
@@ -23,17 +24,46 @@ public class UIFileListHeader extends UIContainer {
 
 		public final String label;
 		public final SortMode sortMode;
-		protected final float tx;
-		protected final int align;
+		public final int align;
+
+		private final float baseTx;
+		private final float baseWidth;
+		private final float marginLeft;
+		private final float marginRight;
 		
-		public UIHeaderButton(String label, SortMode sortMode, float x, float width, float tx, int align) {
+		private float tx;
+
+		public UIHeaderButton(String label, SortMode sortMode, float width, float tx, int align, float marginLeft, float marginRight) {
 			super(UIFileListHeader.this);
 			this.label = label;
 			this.sortMode = sortMode;
-			this.tx = tx-x;
+			this.baseTx = tx;
+			this.tx = tx;
 			this.align = align;
-			setLocation(x, 0);
+			this.baseWidth = width;
+			this.marginLeft = marginLeft;
+			this.marginRight = marginRight;
+			
+			minWidth += baseWidth;
+			marginSum += marginLeft+marginRight;
+			
+			setLocation(0, 0);
 			setSize(width, height);
+		}
+
+		public UIHeaderButton(String label, SortMode sortMode, float width, float tx, int align) {
+			this(label, sortMode, width, tx, align, 0, 0);
+		}
+
+		public float getTextX() {
+			return getX()+tx;
+		}
+		
+		protected float updateMargins(float marginUnit) {
+			float w = baseWidth + (marginLeft+marginRight)*marginUnit;
+			tx = baseTx + marginLeft*marginUnit;
+			setSize(w, getHeight());
+			return w;
 		}
 		
 		protected void drawLabel(GraphAssist g, float tx, float ty) {
@@ -60,15 +90,26 @@ public class UIFileListHeader extends UIContainer {
 		}
 	}
 	
+	public final UIHeaderButton headerName;
+	public final UIHeaderButton headerSize;
+	public final UIHeaderButton headerSizeDiff;
+	public final UIHeaderButton headerFiles;
+	public final UIHeaderButton headerChanges;
+	public final UIHeaderButton headerTime;
+	public final UIHeaderButton headerMark;
+	
+	private float minWidth = 0;
+	private float marginSum = 0;
+	
 	public UIFileListHeader(UIContainer parent) {
 		super(parent);
 		setSize(0, height);
 		
-		new UIHeaderButton("Name", SortMode.name, 0, 340, 32, GraphAssist.LEFT);
-		new UIHeaderButton("Size", SortMode.size, 340, 64, 400, GraphAssist.RIGHT);
-		new UIHeaderButton("(diff)", SortMode.sizeDiff, 404, 64, 408, GraphAssist.LEFT);
-		new UIHeaderButton("Files", SortMode.files, 404+64, 628-50-404-64, 550, GraphAssist.RIGHT);
-		new UIHeaderButton(null, SortMode.changes, 628-50, 150, 720, GraphAssist.RIGHT) {
+		headerName = new UIHeaderButton("Name", SortMode.name, 256, 32, GraphAssist.LEFT, 0, 5);
+		headerSize = new UIHeaderButton("Size", SortMode.size, 64, 60, GraphAssist.RIGHT);
+		headerSizeDiff = new UIHeaderButton("(diff)", SortMode.sizeDiff, 64, 4, GraphAssist.LEFT);
+		headerFiles = new UIHeaderButton("Files", SortMode.files, 96, 64, GraphAssist.RIGHT, 2, 0);
+		headerChanges = new UIHeaderButton(null, SortMode.changes, 150, 142, GraphAssist.RIGHT) {
 			@Override
 			protected void drawLabel(GraphAssist g, float tx, float ty) {
 				g.drawString("Add", tx-100, ty, align, GraphAssist.BOTTOM);
@@ -76,8 +117,8 @@ public class UIFileListHeader extends UIContainer {
 				g.drawString("Rem", tx, ty, align, GraphAssist.BOTTOM);
 			}
 		};
-		new UIHeaderButton("Last modified", SortMode.time, 728, 240, 780, GraphAssist.LEFT);
-		new UIHeaderButton(null, SortMode.mark, 968, 32, 968+8, GraphAssist.RIGHT) {
+		headerTime = new UIHeaderButton("Last modified", SortMode.time, 208, 32, GraphAssist.LEFT, 2, 4);
+		headerMark = new UIHeaderButton(null, SortMode.mark, 32, 8, GraphAssist.RIGHT, 1, 1) {
 			@Override
 			protected void drawLabel(GraphAssist g, float tx, float ty) {
 				UIFileListItemBase.iconCheckMarked.paint(g.graph, 0, tx, ty-16, 16, getPixelScale(), true);
@@ -86,8 +127,32 @@ public class UIFileListHeader extends UIContainer {
 	}
 	
 	@Override
+	public void layout() {
+		float x = getWidth();
+		if(x<minWidth) x = minWidth;
+		float mu = (x-minWidth)/marginSum;
+		
+		UIElement c;
+		for(int i=children.size()-1; i>0; i--) {
+			c = children.get(i);
+			x -= ((UIHeaderButton) c).updateMargins(mu);
+			c.setLocation(x, c.getY());
+		}
+		
+		c = children.get(0);
+		c.setSize(x, c.getHeight());
+	}
+	
+	@Override
 	protected void paintSelf(GraphAssist g) {
 		g.fill(this, colorBackground);
+	}
+	
+	@Override
+	protected void paintChildren(GraphAssist g) {
+		g.pushClip(0, 0, getWidth(), getHeight());
+		super.paintChildren(g);
+		g.popClip();
 	}
 
 }

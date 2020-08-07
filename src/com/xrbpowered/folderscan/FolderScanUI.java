@@ -10,6 +10,7 @@ import com.xrbpowered.folderscan.ui.UIFileListHeader;
 import com.xrbpowered.folderscan.ui.UIProgressDisplay;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
+import com.xrbpowered.zoomui.std.UIScrollBar;
 import com.xrbpowered.zoomui.swing.SwingFrame;
 import com.xrbpowered.zoomui.swing.SwingWindowFactory;
 
@@ -55,7 +56,7 @@ public class FolderScanUI extends UIContainer {
 	@Override
 	public void layout() {
 		listHeader.setLocation(0, 0);
-		listHeader.setSize(getWidth(), listHeader.getHeight());
+		listHeader.setSize(getWidth() - UIScrollBar.defaultWidth, listHeader.getHeight());
 		fileList.setLocation(0, listHeader.getHeight());
 		fileList.setSize(getWidth(), getHeight()-listHeader.getHeight());
 		

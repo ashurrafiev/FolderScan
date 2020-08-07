@@ -94,11 +94,27 @@ public abstract class UIFileListItemBase extends UIHoverElement {
 		g.drawString(s, hdr.getTextX()+tx, getHeight()/2, hdr.align, GraphAssist.CENTER);
 	}
 
+	private float wsize = -1f;
+	
 	protected void paintInfo(GraphAssist g, boolean canFill) {
 		canFill &= !info.marked;
 		UIFileListHeader hdr = FolderScanUI.ui.listHeader;
 		
-		drawString(g, info.name, hdr.headerName);
+		if(wsize<0f)
+			wsize = g.getFontMetrics().charWidth('W');
+		float tx = hdr.headerName.getTextX();
+		float w = hdr.headerName.getWidth();
+		if(info.name.length()*wsize > w-tx && g.getFontMetrics().stringWidth(info.name)>w-tx) {
+			if(g.pushClip(0, 0, w, getHeight())) {
+				drawString(g, info.name, hdr.headerName);
+				g.popClip();
+				g.line(w, 0, w, getHeight(), colorTextDisabled);
+			}
+		}
+		else {
+			drawString(g, info.name, hdr.headerName);
+		}
+		
 		if(info.sizeDiff!=0) {
 			g.setColor(info.sizeDiff>0 ? colorGreen: colorRed);
 			drawString(g, formatLargeNumber(info.sizeDiff, "(%%+.%df%%s)"), hdr.headerSizeDiff);

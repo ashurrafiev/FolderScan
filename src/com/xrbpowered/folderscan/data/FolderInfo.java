@@ -1,6 +1,7 @@
 package com.xrbpowered.folderscan.data;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -63,6 +64,20 @@ public class FolderInfo extends FileInfo {
 		for(FileInfo file: files.values()) {
 			file.removed = true;
 			file.sizeDiff = -file.size;
+		}
+	}
+	
+	public void save(DataOutputStream out) throws IOException {
+		out.writeUTF(name);
+		out.writeInt(folders.size());
+		for(FolderInfo info : folders.values()) {
+			info.save(out);
+		}
+		out.writeInt(files.size());
+		for(FileInfo f : files.values()) {
+			out.writeUTF(f.name);
+			out.writeLong(f.size);
+			out.writeLong(f.time);
 		}
 	}
 

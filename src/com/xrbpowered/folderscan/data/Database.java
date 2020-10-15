@@ -1,14 +1,22 @@
 package com.xrbpowered.folderscan.data;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.Map.Entry;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
+import com.xrbpowered.folderscan.ui.Format;
 import com.xrbpowered.folderscan.ui.UIProgressDisplay;
 
 public class Database extends FolderInfo {
 
+	public static final String versionId = "FolderScan-v1.1";
+	
 	public long scanTime = 0L;
 	
 	public Database() {
@@ -39,14 +47,68 @@ public class Database extends FolderInfo {
 		scanTime = System.currentTimeMillis();
 		return this;
 	}
+
+	public void saveData(String dataPath) {
+		saveData(dataPath, false);
+	}
+
+	public void saveData(String dataPath, boolean fallback) {
+		try {
+			ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(new File(dataPath)));
+			zip.putNextEntry(new ZipEntry("data"));
+			DataOutputStream out = new DataOutputStream(zip);
+			
+			if(!fallback) {
+				out.writeUTF(versionId);
+				out.writeLong(scanTime);
+			}
+			
+			out.writeInt(folders.size());
+			for(Entry<String, FolderInfo> e : folders.entrySet()) {
+				out.writeUTF(e.getKey());
+				e.getValue().save(out);
+			}
+			
+			zip.closeEntry();
+			zip.close();
+			System.out.println("Data saved");
+		}
+		catch(Exception e) {
+			System.err.println(e.getMessage());
+		}
+	}
 	
 	public Database loadData(String dataPath, UIProgressDisplay progress) {
-		printProgress(progress, "Loading data from %s ...", dataPath);
+		return loadData(dataPath, progress, false);
+	}
+
+	public Database loadData(String dataPath, UIProgressDisplay progress, boolean fallback) {
+		if(!fallback)
+			printProgress(progress, "Loading data from %s ...", dataPath);
+		else
+			System.out.println("... attempting to load old version format ...");
 		try {
 			File file = new File(dataPath);
 			ZipInputStream zip = new ZipInputStream(new FileInputStream(file));
 			zip.getNextEntry();
 			DataInputStream in = new DataInputStream(zip);
+
+			scanTime = file.lastModified();
+			if(!fallback) {
+				boolean fallbackVersion = true;
+				try {
+					if(in.readUTF().equals(versionId)) {
+						scanTime = in.readLong();
+						fallbackVersion = false;
+					}
+				}
+				catch(Exception e) {
+				}
+				if(fallbackVersion) {
+					zip.close();
+					return loadData(dataPath, progress, true);
+				}
+			}
 			
 			int n = in.readInt();
 			for(int i=0; i<n; i++) {
@@ -57,7 +119,7 @@ public class Database extends FolderInfo {
 			}
 
 			zip.close();
-			scanTime = file.lastModified();
+			System.out.printf("Scan date: %s\n", Format.formatDate(scanTime));
 			return this;
 		}
 		catch(Exception e) {

@@ -16,7 +16,7 @@ import com.xrbpowered.zoomui.swing.SwingWindowFactory;
 
 public class FolderScanUI extends UIContainer {
 
-	public static final Config config = Config.loadConfig("./folderscan.cfg");
+	public static Config config = Config.loadConfig("./folderscan.cfg");
 	
 	public static FolderScanUI ui;
 	
@@ -39,7 +39,11 @@ public class FolderScanUI extends UIContainer {
 			public void run() {
 				Database oldData = new Database().loadData("./folderscan.data", progress);
 				Database newData = new Database().scanFolders(config, progress);
-				data = new Database().compareData(newData, oldData, config, progress);
+				//newData.saveData("./folderscan2.data");
+				if(oldData==null)
+					data = newData;
+				else
+					data = new Database().compareData(newData, oldData, config, progress);
 				safeUIRunAsync();
 			}
 			@Override

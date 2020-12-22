@@ -2,7 +2,6 @@ package com.xrbpowered.folderscan;
 
 import java.awt.Color;
 
-import com.xrbpowered.folderscan.data.Config;
 import com.xrbpowered.folderscan.data.Database;
 import com.xrbpowered.folderscan.ui.SafeThread;
 import com.xrbpowered.folderscan.ui.UIFileList;
@@ -16,8 +15,6 @@ import com.xrbpowered.zoomui.swing.SwingWindowFactory;
 
 public class FolderScanUI extends UIContainer {
 
-	public static Config config = Config.loadConfig("./folderscan.cfg");
-	
 	public static FolderScanUI ui;
 	
 	public final UIFileListHeader listHeader;
@@ -37,13 +34,7 @@ public class FolderScanUI extends UIContainer {
 			public Database data = null;
 			@Override
 			public void run() {
-				Database oldData = new Database().loadData("./folderscan.data", progress);
-				Database newData = new Database().scanFolders(config, progress);
-				//newData.saveData("./folderscan2.data");
-				if(oldData==null)
-					data = newData;
-				else
-					data = new Database().compareData(newData, oldData, config, progress);
+				data = FolderScan.processData(progress);
 				safeUIRunAsync();
 			}
 			@Override
@@ -77,7 +68,7 @@ public class FolderScanUI extends UIContainer {
 		g.fill(this, Color.WHITE);
 	}
 	
-	public static void main(String[] args) {
+	public static void startUI( ) {
 		SwingFrame frame = new SwingFrame(SwingWindowFactory.use(), "FolderScan", 1200, 800, true, false) {
 			@Override
 			public boolean onClosing() {
@@ -87,6 +78,10 @@ public class FolderScanUI extends UIContainer {
 		};
 		new FolderScanUI(frame.getContainer());
 		frame.show();
+	}
+	
+	public static void main(String[] args) {
+		startUI();
 	}
 
 }

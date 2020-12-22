@@ -2,6 +2,10 @@
 
 **FolderScan** is a tool for quick scanning for changed files within the speficied folders, comparing the current structure to a previously created snapshot. The tool uses modification date/time and file size information provided by the system to detect modifications, it does not calculate file hashes.
 
+Added in version 1.1: difference view in GUI mode.
+
+![Screenshot](screenshot.png?raw=true)
+
 The list of directories to scan are specified in a config file. The directories are scanned recursively. [Example](example.cfg) config file:
 
 ```

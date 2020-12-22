@@ -55,4 +55,10 @@ public class Config {
 		return new Config().load(path);
 	}
 	
+	public static Config forDirectory(String path) {
+		Config cfg = new Config();
+		cfg.list.add(path);
+		return cfg;
+	}
+	
 }

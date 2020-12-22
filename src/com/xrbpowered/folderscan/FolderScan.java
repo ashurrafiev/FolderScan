@@ -56,7 +56,9 @@ public class FolderScan {
 				newData.saveData(savePath);
 		}
 		else {
-			if(oldData.scanTime>newData.scanTime) {
+			if(save)
+				System.err.println("*** Warning: Not saved because not scanned!");
+			if(oldData!=null && oldData.scanTime>newData.scanTime) {
 				Database d = oldData;
 				oldData = newData;
 				newData = d;
@@ -69,21 +71,57 @@ public class FolderScan {
 			return new Database().compareData(newData, oldData, config, progress);
 	}
 	
+	private static void help() {
+		System.out.println();
+		System.out.println("Usage:");
+		System.out.println("java -jar folderscan.jar [options]");
+		System.out.println();
+		System.out.println("Options:");
+		System.out.println("-nogui\n\tDo not open GUI window.");
+		System.out.println("-cfg filename\n\tLoad config from filename. If not specified, folderscan.cfg will be used.");
+		System.out.println("-d path\n\tRecursively scan specified directory. Config is ignored.");
+		System.out.println("-out filename\n\tWrite scan snapshot to a file.");
+		System.out.println("-save\n\tWrite scan snapshot to folderscan.data. Same as -out folderscan.data.");
+		System.out.println("-in filename\n\tLoad snapshot from filename.\n\tBy default, folderscan.data is loaded unless -nocmp is specified.");
+		System.out.println("-alt filename\n\tLoad another snapshot from filename.\n\tCan be used to compare between two snapshots.");
+		System.out.println("-nocmp\n\tDo not compare.");
+		System.out.println("-help\n\tShow this help and quit.");
+		System.exit(1);
+	}
+	
+	private static String getArg(String[] args, int i, String prompt) {
+		if(i>=args.length || args[i].startsWith("-")) {
+			System.err.printf("Expected %s after %s\n", prompt, args[i-1]);
+			help();
+			return null;
+		}
+		else {
+			return args[i];
+		}
+	}
+	
 	public static void main(String[] args) {
 		for(int i=0; i<args.length; i++) {
 			switch(args[i]) {
+				case "-help":
+					help();
+					break;
+					
 				case "-cfg":
-					config = Config.loadConfig(args[++i]);
+					config = Config.loadConfig(getArg(args, ++i, "config file name"));
+					break;
+				case "-d":
+					config = Config.forDirectory(getArg(args, ++i, "directory path"));
 					break;
 				case "-nogui":
 					ui = false;
 					break;
 					
 				case "-in":
-					dataPath = args[++i];
+					dataPath = getArg(args, ++i, "snapshot file name");
 					break;
 				case "-alt":
-					altDataPath = args[++i];
+					altDataPath = getArg(args, ++i, "snapshot file name");
 					break;
 				case "-nocmp":
 					noCompare = true;
@@ -91,7 +129,7 @@ public class FolderScan {
 					
 				case "-out":
 					save = true;
-					savePath = args[++i];
+					savePath = getArg(args, ++i, "output file name");
 					break;
 				case "-save":
 					save = true;
@@ -99,8 +137,7 @@ public class FolderScan {
 					
 				default:
 					System.err.println("Unknown option: "+args[i]);
-					// TODO print usage
-					System.exit(1);
+					help();
 			}
 		}
 

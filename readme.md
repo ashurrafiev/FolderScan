@@ -22,7 +22,7 @@ To use it, rename to `folderscan.cfg`. In this example, the tool will scan `D:/W
 
 ## Download
 
-**JAR file:** [folderscan.jar](https://github.com/ashurrafiev/FolderScan/releases/download/1.1/folderscan.jar) (241 KB)
+**JAR file:** [folderscan.jar](https://github.com/ashurrafiev/FolderScan/releases/download/1.1/folderscan.jar) (214 KB)
 
 ## Using the tool
 

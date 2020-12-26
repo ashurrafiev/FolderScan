@@ -103,3 +103,24 @@ Options:
 | **-alt**&nbsp;_filename_ | Load another snapshot from _filename_.<br/>Can be used to compare between two snapshots. |
 | **-nocmp** | Do not compare. |
 | **-help** | Show command line options and quit. |
+
+
+## GUI Mode
+
+GUI window shows the list of scanned directories. Parent directories are shown on top of the list, followed by subdirectories, and then regular files.
+
+* **LMB** a directory to open it.
+* **RMB drag** or **mousewheel** to scroll the list.
+* **MMB** or **Ctrl+LMB** to mark or unmark a file/directory. Marks have only visual effect and no other function. Marks are not saved between sessions.
+
+Listed file/directory details:
+
+* **Name**
+* **Size**
+* **(diff)** shows the change in size compared to the previous snapshot.
+* **Files** (directory only) shows the total number of files in all subdirectories.
+* **Add/Mod/Rem** for directories: shows the total number of added/modified/removed files; for files: a checkmark shows if the file was added, modified, or removed since the snapshot.
+* **Last modified** shows modification timestamp (for a file) or latest modified file timestamp (for a directory).
+* **Mark** shows user marks.
+
+You can click a column header to sort by that property.
